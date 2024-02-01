@@ -6,6 +6,8 @@ Once you download this repository on your local computer, you can start this doc
 
     docker compose up -d --build
 
+where `-d` means daemon, i.e., start docker compose in the background, and `build` means read the docker-compose.yaml file and build the containers from scratch.
+
 To shut it down:
 
     docker compose down
@@ -17,6 +19,10 @@ To check running docker containers:
 To troubleshoot, check the docker container logs:
 
     docker logs m2.4
+
+or, simply start docker compose in the foreground by omitting the `-d` flag in order to see all error messages immediately:
+
+    docker compose up --build
 
 Prerequisites:  
 1. Add information to your /ets/hosts file
