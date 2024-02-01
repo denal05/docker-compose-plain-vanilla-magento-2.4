@@ -1,0 +1,142 @@
+version: "3.9"
+
+services:
+
+  mysql8:
+   image: mysql:8.0.30
+   command: ["--default-authentication-plugin=mysql_native_password"]
+   ports:
+     - "50001:3306"
+   environment:
+    - "MYSQL_ROOT_PASSWORD=root"
+   volumes:
+    - $HOME/mysql8:/var/lib/mysql
+   restart: unless-stopped
+   container_name: mysql8
+   hostname: mysql8.local
+   networks:
+      contnet:
+       ipv4_address: 172.101.0.10
+
+#  mysql5.6:
+#   image: mysql:5.6
+#   ports:
+#     - "51001:3306"
+#   environment:
+#    - "MYSQL_ROOT_PASSWORD=root"
+#   volumes:
+#    - $HOME/mysql56:/var/lib/mysql
+#   restart: unless-stopped
+#   container_name: mysql56
+#   hostname: mysql56.local
+#   networks:
+#      contnet:
+#       ipv4_address: 172.101.0.20
+
+#  mariadb10:
+#   image: mariadb:10.2.39
+#   ports:
+#     - "52001:3306"
+#   environment:
+#    - "MYSQL_ROOT_PASSWORD=root"
+#    - "MYSQL_DATABASE=magento"
+#   volumes:
+#    - $HOME/mariadb10:/var/lib/mysql
+#   restart: unless-stopped
+#   container_name: mariadb10
+#   hostname: mariadb10.local
+#   networks:
+#      contnet:
+#       ipv4_address: 172.101.0.30
+
+  elasticsearch:
+    image: elasticsearch:7.16.1
+    ports:
+    - "53201:9200"
+    - "53301:9300"
+    environment:
+    - "discovery.type=single-node"
+    - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+    restart: unless-stopped
+    container_name: elasticsearch7
+    hostname: elasticsearch7.local
+    networks:
+      contnet:
+        ipv4_address: 172.101.0.40
+
+#  opensearch:
+#    image: opensearchproject/opensearch:2.11.1
+#    ports:
+#    - "55201:9200"
+#    - "55601:9600"
+#    environment:
+#    - "discovery.type=single-node"
+#    restart: unless-stopped
+#    container_name: opensearch11
+#    hostname: opensearch11.local
+#    networks:
+#      contnet:
+#        ipv4_address: 172.101.0.50
+
+  redis:
+    image: redis:6.0.5
+    environment:
+      - 'ALLOW_EMPTY_PASSWORD=yes'
+    volumes:
+      - ./data/redis:/data 
+    ports:
+      - '54001:6379'
+    restart: unless-stopped
+    container_name: redis6
+    hostname: redis6.local
+    networks:
+      contnet:
+        ipv4_address: 172.101.0.60
+
+  linux-apache-mysql-php-magento:
+    image: ubuntu20.04-apache2.4-mysql8.0.30-php7.4.30-m2.4
+    build:
+      context: ./ubuntu20.04-apache2.4-mysql8.0.30-php7.4.30-m2.4
+      args:
+        USER: $USER
+    restart: unless-stopped
+    ports:
+      - "8010:80"
+      - "8180:8080"
+      - "44310:443"
+#      - "22010:22"
+    depends_on:
+      - mysql8
+      - elasticsearch
+#      - opensearch
+#    links:
+#      - mysql8
+    volumes:
+      - /var/www/:/var/www
+      - /etc/hosts:/etc/hosts
+      - /etc/apache2/ssl:/etc/apache2/ssl
+      - $HOME/.ssh/:$HOME/.ssh/
+    container_name: m2.4
+    hostname: m2.4.local
+    stdin_open: true
+    tty: true
+#    environment:
+#      - WEB_ALIAS_DOMAIN=m2.4.local
+#      - WEB_DOCUMENT_ROOT=/var/www/m2.4/pub
+#      - PHP_DATE_TIMEZONE=EST
+#      - PHP_DISPLAY_ERRORS=1
+#      - PHP_MEMORY_LIMIT=2048M
+#      - PHP_MAX_EXECUTION_TIME=300
+#      - PHP_POST_MAX_SIZE=500M
+#      - PHP_UPLOAD_MAX_FILESIZE=1024M
+    networks:
+      contnet:
+       ipv4_address: 172.101.0.70
+
+networks:
+  contnet:
+    name: cinet-m2.4
+    ipam:
+     driver: default
+     config:
+      - subnet: 172.101.0.0/16
