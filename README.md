@@ -14,12 +14,16 @@ To check running docker containers:
 
     docker ps
 
-After starting the docker container, create the directory /var/www/m2.4, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See below for details.
+To troubleshoot, check the docker container logs:
+
+    docker logs m2.4
 
 Prerequisites:  
 1. Add information to your /ets/hosts file
 1. Generate a self-signed SSL certificate or use the [Let's Encrypt certbot](https://letsencrypt.org/)
 1. Create the local directory /var/www/m2.4/pub/
+
+After doing the prerequisites, such as creating the directory /var/www/m2.4, start the docker containers, get inside the m2.4 docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
 
 ## Important Notes
 
@@ -83,7 +87,7 @@ https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/s
     sudo apt install php7.4-xdebug php7.4-bcmath php7.4-ctype php7.4-curl php7.4-xml php7.4-common php7.4-gd php7.4-intl php7.4-json php7.4-xml php7.4-mbstring openssl php7.4-mysql php7.4-soap php7.4-sockets php-sodium php7.4-xsl php7.4-zip
     sudo update-alternatives --config php
 
-Select 7.2 and check:
+Select the desired version, e.g., 7.4 and check:
 
     $ php -v
 
@@ -176,7 +180,7 @@ Thanks to https://magento.stackexchange.com/a/144715
 
 ### Notes on Xdebug
 
-You can follow this video from Mark Shust to set up Xdebug in PhpStorm and Google Chrome:  
+You can follow these videos from Mark Shust to set up Xdebug in PhpStorm and Google Chrome:  
 [Install the Xdebug helper browser plugin for Chrome & PhpStorm](https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064478?_gl=1*9pfles*_gcl_au*MzY0MjAzNTEyLjE3MDYwMDg4NjI.)  
 [Configure PhpStorm for Xdebug connections](https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064615?_gl=1*utig5f*_gcl_au*MzY0MjAzNTEyLjE3MDYwMDg4NjI.)  
 [Trigger an Xdebug breakpoint in PhpStorm](https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064617?_gl=1*utig5f*_gcl_au*MzY0MjAzNTEyLjE3MDYwMDg4NjI.)  
@@ -184,16 +188,31 @@ You can follow this video from Mark Shust to set up Xdebug in PhpStorm and Googl
  
 ### Notes on CLI tools for backup and restore  
 
-scp username@my.production.server:/path/on/server/to/backup_magento.tar.gz /path/on/my/local/computer
-OR
-rsync -avz -P -e ssh username@my.production.server:/path/on/server/to/backup/_var_www_html__xclude-git-log__2024-01-22T16-44CET.zip /path/on/my/local/computer
+Copy from one computer to another:
 
-zip -r /path/on/server/to/backup/_var_www_html__xclude-git-log__2024-01-22T16-44CET.zip /var/www/html/ -x *.git* -x *.log
+    scp username@my.production.server:/path/on/server/to/backup_magento.tar.gz /path/on/my/local/computer
+    scp /path/on/my/local/computer username@my.production.server:/path/on/server/to/backup_magento.tar.gz
 
-mysqldump -h <hostname> -u<username> -p<password> --databases <db_name> | gzip -9 > /path/on/server/to/backup/db_name__2024-01-22T16-55CET.sql.gz
+Or even better, use rsync to automatically pick up where it left off after losing connection:
 
-du -h /var/www/html | grep [0-9]G > /path/on/server/to/stats/du/du_-h_var_www_html_PIPE_grep_\[0-9\]G__2024-01-22T16-31CET.txt
+    rsync -avz -P -e ssh username@my.production.server:/path/on/server/to/backup/_var_www_html__xclude-git-log__2024-01-22T16-44CET.zip /path/on/my/local/computer
+    rsync -avz -P -e ssh /path/on/my/local/computer username@my.production.server:/path/on/server/to/backup/_var_www_html__xclude-git-log__2024-01-22T16-44CET.zip
+    
+Archive a directory for backup:
 
+    zip -r /path/on/server/to/backup/_var_www_html__xclude-git-log__2024-01-22T16-44CET.zip /var/www/html/ -x *.git* -x *.log
+    
+Take a snapshot of the database as a flat SQL file for backup:
+
+    mysqldump -h <hostname> -u<username> -p<password> --databases <db_name> | gzip -9 > /path/on/server/to/backup/db_name__2024-01-22T16-55CET.sql.gz
+    
+Find out the disk usage of files and directories under a parent directory, filtered by Gigabytes:
+
+    du -h /var/www/html | grep [0-9]G > /path/on/server/to/stats/du/du_-h_var_www_html_PIPE_grep_\[0-9\]G__2024-01-22T16-31CET.txt
+    
+Find out the general disk space on a computer:
+
+    df -h
 
 
 ### Other Tutorials    
