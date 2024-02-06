@@ -1,26 +1,33 @@
 # docker-compose-plain-vanilla-magento-2.4
 
-Configuration files for a Docker container running plain-vanilla Magento Open Source 2.4
+These are configuration files for several Docker containers that represent a system running a plain-vanilla Magento Open Source 2.4 excluding the Magento root directory.
 
-Once you download this repository on your local computer, you can start this docker container by running:
+Note that the following directories are assumed to be present in your local machine, because they are mapped to the Docker containers:
+
+      /var/www/
+      /etc/hosts/
+      /etc/apache2/ssl/
+      ~/.ssh/
+ 
+Once you download this repository on your local computer, you can start the Docker containers by running:
 
     docker compose up -d --build
 
-where `-d` means daemon, i.e., start docker compose in the background, and `build` means read the docker-compose.yaml file and build the containers from scratch.
+where `-d` means daemon, i.e., start Docker compose in the background, and `build` means read the Docker-compose.yaml file and build the containers from scratch.
 
 To shut it down:
 
     docker compose down
 
-To check running docker containers:
+To check running Docker containers:
 
     docker ps
 
-To troubleshoot, check the docker container logs:
+To troubleshoot, check the Docker container logs:
 
     docker logs m2.4
 
-or, simply start docker compose in the foreground by omitting the `-d` flag in order to see all error messages immediately:
+or, simply start Docker compose in the foreground by omitting the `-d` flag in order to see all error messages immediately:
 
     docker compose up --build
 
@@ -29,7 +36,7 @@ Prerequisites:
 1. Generate a self-signed SSL certificate or use the [Let's Encrypt certbot](https://letsencrypt.org/)
 1. Create the local directory /var/www/m2.4/pub/
 
-After doing the prerequisites, such as creating the directory /var/www/m2.4, start the docker containers, get inside the m2.4 docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
+After doing the prerequisites, such as creating the directory /var/www/m2.4, start the Docker containers, get inside the m2.4 Docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
 
 ## Important Notes
 
@@ -166,7 +173,7 @@ The `ubuntu20.04-apache2.4-mysql8.0.30-php7.4.30-m2.4/m2.4.conf` file is already
 
 ### Notes on database errors
 
-After refactoring 'm2.4' throughout its docker directory and its magento root directory /var/www/m2.4 and upon running
+After refactoring 'm2.4' throughout its Docker directory and its magento root directory /var/www/m2.4 and upon running
 
     # bin/magento setup:upgrade
 
@@ -226,7 +233,7 @@ Find out the general disk space on a computer:
 https://www.mageplaza.com/kb/setup-magento-2-on-docker.html  
 
 
-## Installing Magento in your local docker container
+## Installing Magento in your local Docker container
 
     $ cd ~/projects/docker-compose-plain-vanilla-magento-2.4 
     $ docker compose up -d --build  
@@ -247,15 +254,28 @@ Optionally, import a database backup if you have one:
       OR
     # mysql -uroot -proot magento < /var/www/m2.4/backups/magento.sql
 
-Now, to install Magento:
-
     $ docker exec -it m2.4 bash
-    # cd /var/www/m2.4
-    # composer install
+    $ cd /var/www/m2.4/
+
+We have to copy the auth.json file with our credentials to access repo.magento.com to the Docker container:
+
+    $ cp /home/admin/.composer/auth.json /var/www/bogutovo-staging/backups/
+    $ docker exec -it bogutovo-m2.4.6-p3 bash
+    # cd /var/www/bogutovo-staging
+    # cp /var/www/bogutovo-staging/backups/auth.json /root/.config/composer
+    # ll /root/.config/composer/
+    total 28
+    drwxr-xr-x 1 root root 4096 Dec  7 12:40 ./
+    drwxr-xr-x 1 root root 4096 Dec  6 17:50 ../
+    -rw-r--r-- 1 root root   13 Dec  7 10:59 .htaccess
+    -rw------- 1 root root  301 Dec  7 12:40 auth.json
+    -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.dev.pub
+    -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.tags.pub
+
+@TODO Add URL how to get credentials for repo.magento.com
 
 According to the official [Installation Guide - Quick Start On-premises Installation](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en), the following commands are required to install Magento Open Source:
 
-    $ cd /var/www/m2.4/
     $ composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.7 /var/www/m2.4/
 
 Set file permissions (you may need to prepend `sudo`):
