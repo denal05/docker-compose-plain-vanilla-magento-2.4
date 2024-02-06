@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-update-alternatives --set php /usr/bin/php7.4
-service php7.4-fpm start
+update-alternatives --set php /usr/bin/php8.1
+service php8.1-fpm start
 
 a2enmod rewrite ssl actions alias proxy proxy_fcgi proxy_http
 

@@ -259,10 +259,10 @@ Optionally, import a database backup if you have one:
 
 We have to copy the auth.json file with our credentials to access repo.magento.com to the Docker container:
 
-    $ cp /home/admin/.composer/auth.json /var/www/bogutovo-staging/backups/
-    $ docker exec -it bogutovo-m2.4.6-p3 bash
-    # cd /var/www/bogutovo-staging
-    # cp /var/www/bogutovo-staging/backups/auth.json /root/.config/composer
+    $ cp ~/.composer/auth.json /var/www/m2.4
+    $ docker exec -it m2.4 bash
+    # cd /var/www/m2.4
+    # cp /var/www/m2.4/auth.json /root/.config/composer
     # ll /root/.config/composer/
     total 28
     drwxr-xr-x 1 root root 4096 Dec  7 12:40 ./
@@ -276,7 +276,7 @@ We have to copy the auth.json file with our credentials to access repo.magento.c
 
 According to the official [Installation Guide - Quick Start On-premises Installation](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en), the following commands are required to install Magento Open Source:
 
-    $ composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.7 /var/www/m2.4/
+    # composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.6-p3 /var/www/m2.4/
 
 Set file permissions (you may need to prepend `sudo`):
 
@@ -290,7 +290,7 @@ Set file permissions (you may need to prepend `sudo`):
 Install the Magento Open Source application:
 
     $ bin/magento setup:install \
-      --base-url=http://m2.4.local \
+      --base-url=https://m2.4.local \
       --db-host=mysql8.local \
       --db-name=magento \
       --db-user=magento \
@@ -304,7 +304,7 @@ Install the Magento Open Source application:
       --currency=USD \
       --timezone=America/Chicago \
       --use-rewrites=1 \
-      --search-engine=opensearch \
+      --search-engine=elasticsearch \
       --opensearch-host=elasticsearch7.local \
       --opensearch-port=9200 \
       --opensearch-index-prefix=magento2 \
