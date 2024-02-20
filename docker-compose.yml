@@ -133,6 +133,17 @@ services:
       contnet:
        ipv4_address: 172.101.0.70
 
+  mailcatcher:
+    image: sj26/mailcatcher
+    container_name: mc-m2.4
+    hostname: mc-m2.4.local
+    ports:
+      - "10180:1080"
+      - "10125:1025"
+    networks:
+      contnet:
+       ipv4_address: 172.101.0.80
+
 networks:
   contnet:
     name: cinet-m2.4

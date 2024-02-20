@@ -91,6 +91,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     php8.1-xml \
     php8.1-xsl \
     php8.1-zip \
+    sendmail \
     sudo \
     tar \
     unzip \
@@ -110,7 +111,12 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --version=2.3.4 --filename=composer
 
 COPY m24.conf /etc/apache2/sites-available/m24.conf
+COPY php7.4cli.ini /etc/php/7.4/cli/php.ini
+COPY php7.4fpm.ini /etc/php/7.4/fpm/php.ini
+COPY php8.1cli.ini /etc/php/8.1/cli/php.ini
+COPY php8.1fpm.ini /etc/php/8.1/fpm/php.ini
 COPY xdebug.ini /etc/php/7.4/mods-available/
+COPY xdebug.ini /etc/php/8.1/mods-available/
 COPY entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
 

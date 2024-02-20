@@ -1,6 +1,6 @@
 # docker-compose-plain-vanilla-magento-2.4
 
-These are configuration files for several Docker containers that represent a system running a plain-vanilla Magento Open Source 2.4 excluding the Magento root directory.
+These are configuration files for a Docker environment with several containers that represent a system running a plain-vanilla Magento Open Source 2.4 excluding the Magento root directory.
 
 Note that the following directories are assumed to be present in your local machine, because they are mapped to the Docker containers:
 
@@ -199,6 +199,8 @@ You can follow these videos from Mark Shust to set up Xdebug in PhpStorm and Goo
 [Trigger an Xdebug breakpoint in PhpStorm](https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064617?_gl=1*utig5f*_gcl_au*MzY0MjAzNTEyLjE3MDYwMDg4NjI.)  
 [Trigger an Xdebug breakpoint for CLI commands in PhpStorm](https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/36677538?_gl=1*1qvijkx*_gcl_au*MzY0MjAzNTEyLjE3MDYwMDg4NjI.)   
  
+At the moment, Xdebug only works via http, not HTTPS.
+
 ### Notes on CLI tools for backup and restore  
 
 Copy from one computer to another:
@@ -255,14 +257,14 @@ Optionally, import a database backup if you have one:
     # mysql -uroot -proot magento < /var/www/m2.4/backups/magento.sql
 
     $ docker exec -it m2.4 bash
-    $ cd /var/www/m2.4/
+    $ mkdir /var/www/m2.4/
 
 We have to copy the auth.json file with our credentials to access repo.magento.com to the Docker container:
 
     $ cp ~/.composer/auth.json /var/www/m2.4
     $ docker exec -it m2.4 bash
     # cd /var/www/m2.4
-    # cp /var/www/m2.4/auth.json /root/.config/composer
+    # mv /var/www/m2.4/auth.json /root/.config/composer
     # ll /root/.config/composer/
     total 28
     drwxr-xr-x 1 root root 4096 Dec  7 12:40 ./
