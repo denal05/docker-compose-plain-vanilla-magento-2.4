@@ -293,14 +293,14 @@ then, run the following in the app docker container:
 
 and redo the `composer create-project` command. You might need to erase the `/var/www/m2.4` folder before you run composer.
 
-Set file permissions outside the docker container (you may need to prepend `sudo`):
+Set file permissions within the docker container (you may need to prepend `sudo`):
 
-    $ cd /var/www/m2.4/
-    $ find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} +
-    $ find var generated vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} +
-    $ chown -R :www-data .
-    $ chmod -R g+rw .
-    $ chmod u+x bin/magento
+    # cd /var/www/m2.4/
+    # find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} +
+    # find var generated vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} +
+    # chown -R :www-data .
+    # chmod -R g+rw .
+    # chmod u+x bin/magento
 
 Install the Magento Open Source application:
 
