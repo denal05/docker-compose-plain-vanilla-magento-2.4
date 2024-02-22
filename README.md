@@ -237,27 +237,28 @@ https://www.mageplaza.com/kb/setup-magento-2-on-docker.html
 
 ## Installing Magento in your local Docker container
 
+Create a database and its user:
+
     $ cd ~/projects/docker-compose-plain-vanilla-magento-2.4 
     $ docker compose up -d --build  
-
     $ docker exec -it m2.4 bash
-    # mysql -h mysql8 -uroot -proot
+    # mysql -h mysql8.local -uroot -proot
     > create database magento;
-    > create user 'magento'@'%' identified by '<SEE ['db'['connection'['default'['password']]]] IN app/etc/env.php>';
+    > create user 'magento'@'%' identified by 'magento';
     > grant all privileges on magento.* to 'magento'@'%';
     > flush privileges;
     > exit;
 
 Optionally, import a database backup if you have one:
 
-    # mysql -h mysql8 -uroot -proot
+    # mysql -h mysql8.local -uroot -proot
     > use magento;
     > source magento.sql;
       OR
     # mysql -uroot -proot magento < /var/www/m2.4/backups/magento.sql
 
     $ docker exec -it m2.4 bash
-    $ mkdir /var/www/m2.4/
+    # mkdir /var/www/m2.4/
 
 We have to copy the auth.json file with our credentials to access repo.magento.com to the Docker container:
 
@@ -276,11 +277,21 @@ We have to copy the auth.json file with our credentials to access repo.magento.c
 
 @TODO Add URL how to get credentials for repo.magento.com
 
-According to the official [Installation Guide - Quick Start On-premises Installation](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en), the following commands are required to install Magento Open Source:
+According to the official [Installation Guide - Quick Start On-premises Installation](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en) the following commands are required to install Magento Open Source:
 
     # composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.6-p3 /var/www/m2.4/
 
-Set file permissions (you may need to prepend `sudo`):
+If for some reason you are getting a timeout error from composer:
+
+    The process ... exceeded the timeout of 300 seconds.
+
+then, run the following in the app docker container:
+
+    # export COMPOSER_PROCESS_TIMEOUT=3600
+
+and redo the `composer create-project` command. You might need to erase the `/var/www/m2.4` folder before you run composer.
+
+Set file permissions outside the docker container (you may need to prepend `sudo`):
 
     $ cd /var/www/m2.4/
     $ find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} +
@@ -291,7 +302,9 @@ Set file permissions (you may need to prepend `sudo`):
 
 Install the Magento Open Source application:
 
-    $ bin/magento setup:install \
+    $ docker exec -it m2.4 bash
+    # cd /var/www/m2.4
+    # bin/magento setup:install \
       --base-url=https://m2.4.local \
       --db-host=mysql8.local \
       --db-name=magento \
@@ -306,16 +319,23 @@ Install the Magento Open Source application:
       --currency=USD \
       --timezone=America/Chicago \
       --use-rewrites=1 \
-      --search-engine=elasticsearch \
-      --opensearch-host=elasticsearch7.local \
-      --opensearch-port=9200 \
-      --opensearch-index-prefix=magento2 \
-      --opensearch-timeout=15
+      --search-engine=elasticsearch7 \
+      --elasticsearch-host=elasticsearch7.local \
+      --elasticsearch-port=9200 \
+      --elasticsearch-index-prefix=magento2 \
+      --elasticsearch-timeout=15
       
+Optionally, install the official Magento sample products for a demo store:
+
+    $ docker exec -it m2.4 bash
+    # cd /var/www/m2.4
+    # bin/magento sampledata:deploy
+    # bin/magento setup:upgrade
+    
 Optionally, change the base_url in the core_config_data table if importing an existing database backup, and don't forget the trailing slash in the URL:
 
     $ docker exec -it m2.4 bash
-    # mysql -h mysql8 -uroot -proot
+    # mysql -h mysql8.local -uroot -proot
     > use magento;
     > select * from core_config_data where path like "%base_url%";
     > update core_config_data set value="https://m2.4.local/" where path like "%base_url%";
@@ -323,5 +343,5 @@ Optionally, change the base_url in the core_config_data table if importing an ex
 Optionally, create a database backup:
 
     $ docker exec -it m2.4 bash
-    # mysqldump -h mysql8 -uroot -proot magento | gzip -9 > /var/www/m2.4/backups/magento_db_2023-11-13T14-50CET.sql.gz
+    # mysqldump -h mysql8.local -uroot -proot --databases magento | gzip -9 > /var/www/m2.4/backups/magento_db_2023-11-13T14-50CET.sql.gz
 
