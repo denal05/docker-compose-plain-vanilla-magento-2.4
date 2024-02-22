@@ -260,7 +260,11 @@ Optionally, import a database backup if you have one:
     $ docker exec -it m2.4 bash
     # mkdir /var/www/m2.4/
 
-We have to copy the auth.json file with our credentials to access repo.magento.com to the Docker container:
+First, you have to obtain credentials to access repo.magento.com  
+Follow this tutorial:  
+https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/prerequisites/authentication-keys.html
+
+Next, copy the auth.json file with your credentials to access repo.magento.com to the Docker container:
 
     $ cp ~/.composer/auth.json /var/www/m2.4
     $ docker exec -it m2.4 bash
@@ -274,8 +278,6 @@ We have to copy the auth.json file with our credentials to access repo.magento.c
     -rw------- 1 root root  301 Dec  7 12:40 auth.json
     -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.dev.pub
     -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.tags.pub
-
-@TODO Add URL how to get credentials for repo.magento.com
 
 According to the official [Installation Guide - Quick Start On-premises Installation](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en) the following commands are required to install Magento Open Source:
 
