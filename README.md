@@ -66,7 +66,7 @@ Create a database and its user:
     > flush privileges;
     > exit;
 
-Optionally, import a database backup if you have one:
+Optionally, import a database backup if you have one from an existing Magento project:
 
     # mysql -h mysql8.local -uroot -proot
     > use magento;
@@ -121,6 +121,8 @@ Set file permissions within the docker container (you may need to prepend `sudo`
 
 Install the Magento Open Source application:
 
+#### Note: On Linux use `--base-url=https://m2.4.local \`, but on a Mac use `--base-url=https://locahost:8010 \`
+
     $ docker exec -it m2.4 bash
     # cd /var/www/m2.4
     # bin/magento setup:install \
@@ -152,6 +154,8 @@ Optionally, install the official Magento sample products for a demo store:
     # bin/magento setup:upgrade
     
 Optionally, change the base_url in the core_config_data table if importing an existing database backup, and don't forget the trailing slash in the URL:
+
+#### Note: On Linux use `set value="https://m2.4.local/"`, but on a Mac use `set value="https://localhost:8010/"`
 
     $ docker exec -it m2.4 bash
     # mysql -h mysql8.local -uroot -proot
@@ -257,7 +261,7 @@ and recommends the following:
             }
         }
 
-and visit http://m2.4.local one more time.
+and visit `https://m2.4.local` on Linux or `https://localhost:8010` on a Mac one more time.
 
 According to the devdocs "Quick start on-premises installation"
 https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en  
@@ -376,6 +380,4 @@ https://www.codextblog.com/magento-2/upgrade-magento-version-2-3-x-2-4-0/
 Official:  
 https://experienceleague.adobe.com/docs/commerce-operations/upgrade-guide/overview.html?lang=en  
 https://experienceleague.adobe.com/docs/commerce-operations/upgrade-guide/implementation/perform-upgrade.html  
-
-@TODO Modify docker config files and documentation to optimize for Macintosh
 
