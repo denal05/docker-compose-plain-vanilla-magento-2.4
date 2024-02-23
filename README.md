@@ -363,8 +363,19 @@ Find out the general disk space on a computer:
 
 ### Other Tutorials    
 
+#### How to setup Magento on Docker
 https://www.mageplaza.com/kb/setup-magento-2-on-docker.html  
 https://github.com/markshust/docker-magento  
+
+#### How to upgrade Magento
+
+Unofficial:  
+https://www.mageplaza.com/kb/setup-magento-2-on-docker.html  
+https://www.codextblog.com/magento-2/upgrade-magento-version-2-3-x-2-4-0/
+
+Official:  
+https://experienceleague.adobe.com/docs/commerce-operations/upgrade-guide/overview.html?lang=en  
+https://experienceleague.adobe.com/docs/commerce-operations/upgrade-guide/implementation/perform-upgrade.html  
 
 @TODO Modify docker config files and documentation to optimize for Macintosh
 
