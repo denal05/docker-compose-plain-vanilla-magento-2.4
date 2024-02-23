@@ -38,6 +38,8 @@ Prerequisites:
 
 After doing the prerequisites, such as creating the directory /var/www/m2.4, start the Docker containers, get inside the m2.4 Docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See the following section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
 
+#### *Important note*: These Docker config files have been made to work out-of-the-box for Docker on Linux. It requires some changes for it to run on Macintosh. The main difference is that on Linux you can access the Docker app container's website on your browser by typing `https://m2.4.local` in the address bar, whereas on Mac you have to use `https://localhost:8010`. This is because you cannot access Docker container IP addresses directly on the Macintosh host; you have to use `localhost` with port forwarding as defined in docker-compose.yml. 
+
 ## Installing Magento in your local Docker container
 
 Manually add the following lines in your `/ets/hosts` file:
@@ -315,6 +317,22 @@ You can follow these videos from Mark Shust to set up Xdebug in PhpStorm and Goo
  
 Note: At the moment, Xdebug only works via http, not HTTPS. You have to comment-out 
 
+### Notes on MailCatcher
+
+Magento admin panel settings to use MailCatcher:  
+
+Stores > Config > Advanced > System > Mail Sending Settings  
+
+    Disable Email Communications:       No
+    Transport:                          SMTP
+    Host:                               mailcatcher.local
+    Port (25):                          1025
+    Set Return-Path:                    Yes
+    Username:
+    Password:
+    Auth:                               NONE
+    SSL:                                None
+
 ### Notes on CLI tools for backup and restore  
 
 Copy from one computer to another:
@@ -347,4 +365,6 @@ Find out the general disk space on a computer:
 
 https://www.mageplaza.com/kb/setup-magento-2-on-docker.html  
 https://github.com/markshust/docker-magento  
+
+@TODO Modify docker config files and documentation to optimize for Macintosh
 
