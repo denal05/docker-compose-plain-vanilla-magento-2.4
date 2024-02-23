@@ -32,23 +32,137 @@ or, simply start Docker compose in the foreground by omitting the `-d` flag in o
     docker compose up --build
 
 Prerequisites:  
-1. Add information to your /ets/hosts file
+1. Add information to your `/ets/hosts` file
 1. Generate a self-signed SSL certificate or use the [Let's Encrypt certbot](https://letsencrypt.org/)
-1. Create the local directory /var/www/m2.4/pub/
+1. Create the local directory `/var/www/m2.4/pub/`
 
-After doing the prerequisites, such as creating the directory /var/www/m2.4, start the Docker containers, get inside the m2.4 Docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
+After doing the prerequisites, such as creating the directory /var/www/m2.4, start the Docker containers, get inside the m2.4 Docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See the following section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
 
-## Important Notes
+## Installing Magento in your local Docker container
 
-### Notes on /etc/hosts
-
-You must manually add the following lines in your /ets/hosts file:
+Manually add the following lines in your `/ets/hosts` file:
 
     # docker-compose-plain-vanilla-magento-2.4
-    172.101.0.10	mysql8.local
-    172.101.0.40	elasticsearch7.local
-    172.101.0.60	redis6.local
-    172.101.0.70	m2.4.local
+    172.101.0.10    m2.4.local
+    172.101.0.20    mysql8.local
+    172.101.0.30    mysql56.local
+    172.101.0.40    mariadb10.local
+    172.101.0.50    elasticsearch7.local
+    172.101.0.60    opensearch11.local
+    172.101.0.70    redis6.local
+    172.101.0.80    mailcatcher.local
+    
+Create a database and its user:
+
+    $ cd ~/projects/docker-compose-plain-vanilla-magento-2.4 
+    $ docker compose up -d --build  
+    $ docker exec -it m2.4 bash
+    # mysql -h mysql8.local -uroot -proot
+    > create database magento;
+    > create user 'magento'@'%' identified by 'magento';
+    > grant all privileges on magento.* to 'magento'@'%';
+    > flush privileges;
+    > exit;
+
+Optionally, import a database backup if you have one:
+
+    # mysql -h mysql8.local -uroot -proot
+    > use magento;
+    > source magento.sql;
+      OR
+    # mysql -uroot -proot magento < /var/www/m2.4/backups/magento.sql
+
+    $ docker exec -it m2.4 bash
+    # mkdir /var/www/m2.4/
+
+Obtain credentials to access `repo.magento.com`.  
+Follow this tutorial:  
+https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/prerequisites/authentication-keys.html
+
+Copy the auth.json file with your credentials to access repo.magento.com to the Docker container:
+
+    $ cp ~/.composer/auth.json /var/www/m2.4
+    $ docker exec -it m2.4 bash
+    # cd /var/www/m2.4
+    # mv /var/www/m2.4/auth.json /root/.config/composer
+    # ll /root/.config/composer/
+    total 28
+    drwxr-xr-x 1 root root 4096 Dec  7 12:40 ./
+    drwxr-xr-x 1 root root 4096 Dec  6 17:50 ../
+    -rw-r--r-- 1 root root   13 Dec  7 10:59 .htaccess
+    -rw------- 1 root root  301 Dec  7 12:40 auth.json
+    -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.dev.pub
+    -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.tags.pub
+
+According to the official [Installation Guide - Quick Start On-premises Installation](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en) the following commands are required to install Magento Open Source:
+
+    # composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.6-p3 /var/www/m2.4/
+
+If for some reason you are getting a timeout error from composer:
+
+    The process ... exceeded the timeout of 300 seconds.
+
+then, run the following in the app docker container:
+
+    # export COMPOSER_PROCESS_TIMEOUT=3600
+
+and redo the `composer create-project` command. You might need to erase the `/var/www/m2.4` folder before you run composer.
+
+Set file permissions within the docker container (you may need to prepend `sudo`):
+
+    # cd /var/www/m2.4/
+    # find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} +
+    # find var generated vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} +
+    # chown -R :www-data .
+    # chmod -R g+rw .
+    # chmod u+x bin/magento
+
+Install the Magento Open Source application:
+
+    $ docker exec -it m2.4 bash
+    # cd /var/www/m2.4
+    # bin/magento setup:install \
+      --base-url=https://m2.4.local \
+      --db-host=mysql8.local \
+      --db-name=magento \
+      --db-user=magento \
+      --db-password=magento \
+      --admin-firstname=admin \
+      --admin-lastname=admin \
+      --admin-email=admin@admin.com \
+      --admin-user=admin \
+      --admin-password=admin123 \
+      --language=en_US \
+      --currency=USD \
+      --timezone=America/Chicago \
+      --use-rewrites=1 \
+      --search-engine=elasticsearch7 \
+      --elasticsearch-host=elasticsearch7.local \
+      --elasticsearch-port=9200 \
+      --elasticsearch-index-prefix=magento2 \
+      --elasticsearch-timeout=15
+      
+Optionally, install the official Magento sample products for a demo store:
+
+    $ docker exec -it m2.4 bash
+    # cd /var/www/m2.4
+    # bin/magento sampledata:deploy
+    # bin/magento setup:upgrade
+    
+Optionally, change the base_url in the core_config_data table if importing an existing database backup, and don't forget the trailing slash in the URL:
+
+    $ docker exec -it m2.4 bash
+    # mysql -h mysql8.local -uroot -proot
+    > use magento;
+    > select * from core_config_data where path like "%base_url%";
+    > update core_config_data set value="https://m2.4.local/" where path like "%base_url%";
+
+Optionally, create a database backup:
+
+    $ docker exec -it m2.4 bash
+    # mysqldump -h mysql8.local -uroot -proot --databases magento | gzip -9 > /var/www/m2.4/backups/magento_db_2023-11-13T14-50CET.sql.gz
+
+## Important Notes
 
 ### Notes on Composer
 
@@ -199,7 +313,7 @@ You can follow these videos from Mark Shust to set up Xdebug in PhpStorm and Goo
 [Trigger an Xdebug breakpoint in PhpStorm](https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064617?_gl=1*utig5f*_gcl_au*MzY0MjAzNTEyLjE3MDYwMDg4NjI.)  
 [Trigger an Xdebug breakpoint for CLI commands in PhpStorm](https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/36677538?_gl=1*1qvijkx*_gcl_au*MzY0MjAzNTEyLjE3MDYwMDg4NjI.)   
  
-At the moment, Xdebug only works via http, not HTTPS.
+Note: At the moment, Xdebug only works via http, not HTTPS. You have to comment-out 
 
 ### Notes on CLI tools for backup and restore  
 
@@ -229,121 +343,8 @@ Find out the general disk space on a computer:
 
     df -h
 
-
 ### Other Tutorials    
 
 https://www.mageplaza.com/kb/setup-magento-2-on-docker.html  
-
-
-## Installing Magento in your local Docker container
-
-Create a database and its user:
-
-    $ cd ~/projects/docker-compose-plain-vanilla-magento-2.4 
-    $ docker compose up -d --build  
-    $ docker exec -it m2.4 bash
-    # mysql -h mysql8.local -uroot -proot
-    > create database magento;
-    > create user 'magento'@'%' identified by 'magento';
-    > grant all privileges on magento.* to 'magento'@'%';
-    > flush privileges;
-    > exit;
-
-Optionally, import a database backup if you have one:
-
-    # mysql -h mysql8.local -uroot -proot
-    > use magento;
-    > source magento.sql;
-      OR
-    # mysql -uroot -proot magento < /var/www/m2.4/backups/magento.sql
-
-    $ docker exec -it m2.4 bash
-    # mkdir /var/www/m2.4/
-
-First, you have to obtain credentials to access repo.magento.com  
-Follow this tutorial:  
-https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/prerequisites/authentication-keys.html
-
-Next, copy the auth.json file with your credentials to access repo.magento.com to the Docker container:
-
-    $ cp ~/.composer/auth.json /var/www/m2.4
-    $ docker exec -it m2.4 bash
-    # cd /var/www/m2.4
-    # mv /var/www/m2.4/auth.json /root/.config/composer
-    # ll /root/.config/composer/
-    total 28
-    drwxr-xr-x 1 root root 4096 Dec  7 12:40 ./
-    drwxr-xr-x 1 root root 4096 Dec  6 17:50 ../
-    -rw-r--r-- 1 root root   13 Dec  7 10:59 .htaccess
-    -rw------- 1 root root  301 Dec  7 12:40 auth.json
-    -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.dev.pub
-    -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.tags.pub
-
-According to the official [Installation Guide - Quick Start On-premises Installation](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/composer.html?lang=en) the following commands are required to install Magento Open Source:
-
-    # composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.6-p3 /var/www/m2.4/
-
-If for some reason you are getting a timeout error from composer:
-
-    The process ... exceeded the timeout of 300 seconds.
-
-then, run the following in the app docker container:
-
-    # export COMPOSER_PROCESS_TIMEOUT=3600
-
-and redo the `composer create-project` command. You might need to erase the `/var/www/m2.4` folder before you run composer.
-
-Set file permissions within the docker container (you may need to prepend `sudo`):
-
-    # cd /var/www/m2.4/
-    # find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} +
-    # find var generated vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} +
-    # chown -R :www-data .
-    # chmod -R g+rw .
-    # chmod u+x bin/magento
-
-Install the Magento Open Source application:
-
-    $ docker exec -it m2.4 bash
-    # cd /var/www/m2.4
-    # bin/magento setup:install \
-      --base-url=https://m2.4.local \
-      --db-host=mysql8.local \
-      --db-name=magento \
-      --db-user=magento \
-      --db-password=magento \
-      --admin-firstname=admin \
-      --admin-lastname=admin \
-      --admin-email=admin@admin.com \
-      --admin-user=admin \
-      --admin-password=admin123 \
-      --language=en_US \
-      --currency=USD \
-      --timezone=America/Chicago \
-      --use-rewrites=1 \
-      --search-engine=elasticsearch7 \
-      --elasticsearch-host=elasticsearch7.local \
-      --elasticsearch-port=9200 \
-      --elasticsearch-index-prefix=magento2 \
-      --elasticsearch-timeout=15
-      
-Optionally, install the official Magento sample products for a demo store:
-
-    $ docker exec -it m2.4 bash
-    # cd /var/www/m2.4
-    # bin/magento sampledata:deploy
-    # bin/magento setup:upgrade
-    
-Optionally, change the base_url in the core_config_data table if importing an existing database backup, and don't forget the trailing slash in the URL:
-
-    $ docker exec -it m2.4 bash
-    # mysql -h mysql8.local -uroot -proot
-    > use magento;
-    > select * from core_config_data where path like "%base_url%";
-    > update core_config_data set value="https://m2.4.local/" where path like "%base_url%";
-
-Optionally, create a database backup:
-
-    $ docker exec -it m2.4 bash
-    # mysqldump -h mysql8.local -uroot -proot --databases magento | gzip -9 > /var/www/m2.4/backups/magento_db_2023-11-13T14-50CET.sql.gz
+https://github.com/markshust/docker-magento  
 
