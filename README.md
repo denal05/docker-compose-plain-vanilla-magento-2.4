@@ -110,7 +110,8 @@ then, run the following in the app docker container:
 
 and redo the `composer create-project` command. You might need to erase the `/var/www/m2.4` folder before you run composer.
 
-Set file permissions within the docker container (you may need to prepend `sudo`):
+Set file permissions within the docker container (you may need to prepend `sudo`):  
+*Note:* On Linux use the group `www-data`, but on a Mac use the group `_www`  
 
     # cd /var/www/m2.4/
     # find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} +
