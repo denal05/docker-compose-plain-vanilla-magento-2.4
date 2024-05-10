@@ -120,10 +120,19 @@ COPY xdebug.ini /etc/php/8.1/mods-available/
 COPY entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
 
+# https://blog.thesparktree.com/cron-in-docker 
+COPY crontab.cron /etc/crontab
+RUN chmod 0644 /etc/crontab
+RUN crontab -u root /etc/crontab
+
 USER root
 
 # workdir
 WORKDIR /home/$USER
 
+EXPOSE 9003
+
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 CMD ["/bin/bash"]
+CMD ["cron","-f", "-L", "2"]
+

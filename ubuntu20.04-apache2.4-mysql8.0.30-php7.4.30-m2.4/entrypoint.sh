@@ -18,4 +18,9 @@ service apache2 restart
 
 # systemctl status apache2.service
 
+echo "$@"
 exec "$@"
+
+env >> /etc/environment
+exec "cron -f"
+
