@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     htop \
     iputils-ping \
     locales \
+    logrotate \
     mysql-client \
     nano \
     openssh-client \
@@ -124,6 +125,12 @@ RUN ["chmod", "+x", "/entrypoint.sh"]
 COPY crontab.cron /etc/crontab
 RUN chmod 0644 /etc/crontab
 RUN crontab -u root /etc/crontab
+
+# https://github.com/logrotate/logrotate
+COPY logrotate.d/apache2 /etc/logrotate.d/apache2
+RUN chmod 0644 /etc/logrotate.d/apache2
+COPY logrotate.d/magento2 /etc/logrotate.d/magento2
+RUN chmod 0644 /etc/logrotate.d/magento2
 
 USER root
 

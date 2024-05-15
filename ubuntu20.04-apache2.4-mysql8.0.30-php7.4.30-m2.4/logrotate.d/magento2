@@ -1,0 +1,6 @@
+/var/www/m2.4/var/log/*.log {
+        rotate 3
+        size 100M
+        compress
+}
+

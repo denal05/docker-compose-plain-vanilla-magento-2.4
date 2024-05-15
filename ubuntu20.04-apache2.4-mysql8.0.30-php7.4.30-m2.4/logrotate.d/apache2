@@ -1,0 +1,6 @@
+/var/log/apache2/*.log {
+        rotate 3
+        size 100M
+        compress
+}
+
