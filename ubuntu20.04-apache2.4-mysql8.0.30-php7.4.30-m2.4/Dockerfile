@@ -8,13 +8,13 @@ ARG USER
 ENV DEBIAN_FRONTEND noninteractive
 
 # update sources list
-RUN apt-get update
+RUN apt update
 
 # add repo for php versions and install php
-RUN apt-get install -y software-properties-common
+RUN apt install -y software-properties-common
 RUN add-apt-repository ppa:ondrej/php
 
-RUN apt-get update && apt-get install -yq --no-install-recommends \
+RUN apt update && apt install -yq --no-install-recommends \
     apache2 \
     apt-utils \
     build-essential \
@@ -99,7 +99,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 #    vi \
     vim \
     wget \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt clean && rm -rf /var/lib/apt/lists/*
 
 # add user and create ssh folder
 RUN useradd -m $USER && echo "$USER:mage123" | chpasswd && adduser $USER sudo
@@ -111,26 +111,29 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --version=2.3.4 --filename=composer
 
-COPY m24.conf /etc/apache2/sites-available/m24.conf
-COPY php7.4cli.ini /etc/php/7.4/cli/php.ini
-COPY php7.4fpm.ini /etc/php/7.4/fpm/php.ini
-COPY php8.1cli.ini /etc/php/8.1/cli/php.ini
-COPY php8.1fpm.ini /etc/php/8.1/fpm/php.ini
-COPY xdebug.ini /etc/php/7.4/mods-available/
-COPY xdebug.ini /etc/php/8.1/mods-available/
+COPY etc/apache2/sites-available/m24.conf /etc/apache2/sites-available/m24.conf
+COPY etc/php/7.4/cli/php7.4cli.ini /etc/php/7.4/cli/php.ini
+COPY etc/php/7.4/fpm/php7.4fpm.ini /etc/php/7.4/fpm/php.ini
+COPY etc/php/8.1/cli/php8.1cli.ini /etc/php/8.1/cli/php.ini
+COPY etc/php/8.1/fpm/php8.1fpm.ini /etc/php/8.1/fpm/php.ini
+COPY etc/php/x.y/mods-available/xdebug.ini /etc/php/7.4/mods-available/
+COPY etc/php/x.y/mods-available/xdebug.ini /etc/php/8.1/mods-available/
 COPY entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
 
 # https://blog.thesparktree.com/cron-in-docker 
-COPY crontab.cron /etc/crontab
+COPY etc/crontab /etc/crontab
 RUN chmod 0644 /etc/crontab
 RUN crontab -u root /etc/crontab
 
 # https://github.com/logrotate/logrotate
-COPY logrotate.d/apache2 /etc/logrotate.d/apache2
+COPY etc/logrotate.d/apache2 /etc/logrotate.d/apache2
 RUN chmod 0644 /etc/logrotate.d/apache2
-COPY logrotate.d/magento2 /etc/logrotate.d/magento2
+COPY etc/logrotate.d/magento2 /etc/logrotate.d/magento2
 RUN chmod 0644 /etc/logrotate.d/magento2
+
+# redis 7
+COPY etc/sysctl.conf /etc/sysctl.conf
 
 USER root
 
