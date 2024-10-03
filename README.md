@@ -2,12 +2,12 @@
 
 These are configuration files for a Docker environment with several containers that represent a system running a plain-vanilla Magento Open Source 2.4 excluding the Magento root directory.
 
-Note that the following directories are assumed to be present in your local machine, because they are mapped to the Docker containers:
+Note that the following three directories and one file are assumed to be present in your local machine, because they are mapped to the Docker containers:
 
       /var/www/
-      /etc/hosts/
       /etc/apache2/ssl/
       ~/.ssh/
+      /etc/hosts
  
 Once you download this repository on your local computer, you can start the Docker containers by running:
 
@@ -36,9 +36,9 @@ Prerequisites:
 1. Generate a self-signed SSL certificate or use the [Let's Encrypt certbot](https://letsencrypt.org/)
 1. Create the local directory `/var/www/m2.4/pub/`
 
-After doing the prerequisites, such as creating the directory /var/www/m2.4, start the Docker containers, get inside the m2.4 Docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See the following section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
+After doing the prerequisites, such as creating the directory `/var/www/m2.4/`, start the Docker containers, get inside the m2.4 Docker container, run the composer command to fetch the Magento composer project, and then run the command to install Magento via CLI. See the following section [#installing-magento-in-your-local-docker-container](#installing-magento-in-your-local-docker-container)
 
-#### *Important note*: These Docker config files have been made to work out-of-the-box for Docker on Linux. It requires some changes for it to run on Macintosh. The main difference is that on Linux you can access the Docker app container's website on your browser by typing `https://m2.4.local` in the address bar, whereas on Mac you have to use `https://localhost:8010`. This is because you cannot access Docker container IP addresses directly on the Macintosh host; you have to use `localhost` with port forwarding as defined in docker-compose.yml. 
+#### *Important note*: These Docker config files have been made to work out-of-the-box for Docker on Linux. It requires some changes for it to run on Macintosh. The main difference is that on Linux you can access the Docker app container's website on your browser by typing `https://m2.4.local` in the address bar (i.e. it's based on a local DNS entry), whereas on Mac you have to use `https://localhost:8010` or whichever port you configure (i.e. the domain name is always `localhost` and it's based on the port number). This is because you cannot access Docker container IP addresses directly on the Macintosh host; you have to use `localhost` with port forwarding as defined in docker-compose.yml. 
 
 ## Installing Magento in your local Docker container
 
@@ -60,22 +60,24 @@ Create a database and its user:
     $ docker compose up -d --build  
     $ docker exec -it m2.4 bash
     # mysql -h mysql8.local -uroot -proot
-    > create database magento;
-    > create user 'magento'@'%' identified by 'magento';
-    > grant all privileges on magento.* to 'magento'@'%';
+    > create database m24_db;
+    > create user 'm24_user'@'%' identified by 'magento';
+    > grant all privileges on m24_db.* to 'm24_user'@'%';
     > flush privileges;
     > exit;
 
 Optionally, import a database backup if you have one from an existing Magento project:
 
     # mysql -h mysql8.local -uroot -proot
-    > use magento;
-    > source magento.sql;
+    > use m24_db;
+    > source m24_db.sql;
       OR
-    # mysql -uroot -proot magento < /var/www/m2.4/backups/magento.sql
+    # mysql -uroot -proot m24_db < /var/www/m2.4/backups/m24_.sql
+
+Now, let's switch to the Magento root directory:
 
     $ docker exec -it m2.4 bash
-    # mkdir /var/www/m2.4/
+    # cd /var/www/m2.4/
 
 Obtain credentials to access `repo.magento.com`.  
 Follow this tutorial:  
@@ -91,7 +93,6 @@ Copy the auth.json file with your credentials to access repo.magento.com to the 
     total 28
     drwxr-xr-x 1 root root 4096 Dec  7 12:40 ./
     drwxr-xr-x 1 root root 4096 Dec  6 17:50 ../
-    -rw-r--r-- 1 root root   13 Dec  7 10:59 .htaccess
     -rw------- 1 root root  301 Dec  7 12:40 auth.json
     -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.dev.pub
     -rw-r--r-- 1 root root  799 Dec  6 17:50 keys.tags.pub
@@ -122,15 +123,15 @@ Set file permissions within the docker container (you may need to prepend `sudo`
 
 Install the Magento Open Source application:
 
-#### Note: On Linux use `--base-url=https://m2.4.local \`, but on a Mac use `--base-url=https://locahost:8010 \`
+#### Note: On Linux use `--base-url=https://m2.4.local/ \`, but on a Mac use `--base-url=https://locahost:8010/ \`
 
     $ docker exec -it m2.4 bash
     # cd /var/www/m2.4
     # bin/magento setup:install \
-      --base-url=https://m2.4.local \
+      --base-url=https://m2.4.local/ \
       --db-host=mysql8.local \
-      --db-name=magento \
-      --db-user=magento \
+      --db-name=m24_db \
+      --db-user=m24_user \
       --db-password=magento \
       --admin-firstname=admin \
       --admin-lastname=admin \

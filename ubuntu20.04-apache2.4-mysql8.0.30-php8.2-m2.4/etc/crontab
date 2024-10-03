@@ -21,6 +21,6 @@
   *  *  *  *  * root date >/proc/1/fd/1 2>/proc/1/fd/2 >> /var/www/m2.4/var/log/magento.cron.log
 #~ MAGENTO START d136e4effed2337a62437b5ea6e89d450b7ebd44 
 #*/10 *  *  *  * root /usr/bin/php8.1 /var/www/m2.4/bin/magento indexer:reindex 2>&1 >> /var/www/m2.4/var/log/magento.cron.log
-  *  *  *  *  * root /usr/bin/php8.1 /var/www/m2.4/bin/magento cron:run 2>&1 >> /var/www/m2.4/var/log/magento.cron.log
+  *  *  *  *  * root /usr/bin/php8.2 /var/www/m2.4/bin/magento cron:run 2>&1 >> /var/www/m2.4/var/log/magento.cron.log
 #~ MAGENTO END d136e4effed2337a62437b5ea6e89d450b7ebd44
 

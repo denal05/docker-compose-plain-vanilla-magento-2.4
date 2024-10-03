@@ -3,9 +3,9 @@ version: "3.9"
 services:
 
   linux-apache-mysql-php-magento:
-    image: ubuntu20.04-apache2.4-mysql8.0.30-php7.4.30-m2.4
+    image: ubuntu20.04-apache2.4-mysql8.0.30-php8.2-m2.4
     build:
-      context: ./ubuntu20.04-apache2.4-mysql8.0.30-php7.4.30-m2.4
+      context: ./ubuntu20.04-apache2.4-mysql8.0.30-php8.2-m2.4
       args:
         USER: $USER
     restart: unless-stopped
@@ -21,9 +21,9 @@ services:
 #    links:
 #      - mysql8
     volumes:
-      - /var/www/:/var/www
+      - /var/www/:/var/www/
       - /etc/hosts:/etc/hosts
-      - /etc/apache2/ssl:/etc/apache2/ssl
+      - /etc/apache2/ssl/:/etc/apache2/ssl/
       - $HOME/.ssh/:$HOME/.ssh/
     container_name: m2.4
     hostname: m2.4.local

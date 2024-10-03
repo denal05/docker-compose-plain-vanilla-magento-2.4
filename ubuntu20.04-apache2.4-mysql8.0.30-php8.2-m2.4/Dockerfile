@@ -92,6 +92,29 @@ RUN apt update && apt install -yq --no-install-recommends \
     php8.1-xml \
     php8.1-xsl \
     php8.1-zip \
+    php8.2 \
+    php8.2-bcmath \
+    php8.2-cli \
+    php8.2-common \
+    php8.2-ctype \
+    php8.2-curl \
+    php8.2-dev \
+    php8.2-dom \
+    php8.2-fileinfo \
+    php8.2-fpm \
+    php8.2-gd \
+    php8.2-intl \
+    php8.2-ldap \
+    php8.2-mbstring \
+    php8.2-mcrypt \
+    php8.2-mysql \
+    php8.2-redis \
+    php8.2-soap \
+    php8.2-sqlite3 \
+    php8.2-xdebug \
+    php8.2-xml \
+    php8.2-xsl \
+    php8.2-zip \
     sendmail \
     sudo \
     tar \
@@ -102,9 +125,9 @@ RUN apt update && apt install -yq --no-install-recommends \
     && apt clean && rm -rf /var/lib/apt/lists/*
 
 # add user and create ssh folder
-RUN useradd -m $USER && echo "$USER:mage123" | chpasswd && adduser $USER sudo
-RUN mkdir -p /home/$USER/.ssh
-RUN chown -R $USER:$USER /home/$USER/.ssh
+RUN useradd -m denis && echo "denis:mage123" | chpasswd && adduser denis sudo
+RUN mkdir -p /home/denis/.ssh
+RUN chown -R denis:denis /home/denis/.ssh
 
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
@@ -116,8 +139,11 @@ COPY etc/php/7.4/cli/php7.4cli.ini /etc/php/7.4/cli/php.ini
 COPY etc/php/7.4/fpm/php7.4fpm.ini /etc/php/7.4/fpm/php.ini
 COPY etc/php/8.1/cli/php8.1cli.ini /etc/php/8.1/cli/php.ini
 COPY etc/php/8.1/fpm/php8.1fpm.ini /etc/php/8.1/fpm/php.ini
+COPY etc/php/8.2/cli/php8.2cli.ini /etc/php/8.2/cli/php.ini
+COPY etc/php/8.2/fpm/php8.2fpm.ini /etc/php/8.2/fpm/php.ini
 COPY etc/php/x.y/mods-available/xdebug.ini /etc/php/7.4/mods-available/
 COPY etc/php/x.y/mods-available/xdebug.ini /etc/php/8.1/mods-available/
+COPY etc/php/x.y/mods-available/xdebug.ini /etc/php/8.2/mods-available/
 COPY entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
 
@@ -138,7 +164,7 @@ COPY etc/sysctl.conf /etc/sysctl.conf
 USER root
 
 # workdir
-WORKDIR /home/$USER
+WORKDIR /home/denis
 
 EXPOSE 9003
 
