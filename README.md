@@ -40,6 +40,16 @@ After doing the prerequisites, such as creating the directory `/var/www/m2.4/`, 
 
 #### *Important note*: These Docker config files have been made to work out-of-the-box for Docker on Linux. It requires some changes for it to run on Macintosh. The main difference is that on Linux you can access the Docker app container's website on your browser by typing `https://m2.4.local` in the address bar (i.e. it's based on a local DNS entry), whereas on Mac you have to use `https://localhost:8010` or whichever port you configure (i.e. the domain name is always `localhost` and it's based on the port number). This is because you cannot access Docker container IP addresses directly on the Macintosh host; you have to use `localhost` with port forwarding as defined in docker-compose.yml. 
 
+## Known Issues
+
+On restarting the Docker container, Magento can't find any products, and needs reindexing. Simply manually run:  
+
+    bin/magento indexer:reindex
+
+or set it up in a cron job automatically.
+
+Note to self: Try setting up automatic reindexing upon container restart using entrypoint.sh
+
 ## Installing Magento in your local Docker container
 
 Manually add the following lines in your `/ets/hosts` file:
