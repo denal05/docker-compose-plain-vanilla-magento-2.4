@@ -40,7 +40,7 @@ services:
 #      - PHP_UPLOAD_MAX_FILESIZE=1024M
     networks:
       contnet:
-       ipv4_address: 172.101.0.10
+       ipv4_address: 172.16.1.10
 
   mysql8:
    image: mysql:8.0.30
@@ -56,7 +56,7 @@ services:
    hostname: mysql8.local
    networks:
       contnet:
-       ipv4_address: 172.101.0.20
+       ipv4_address: 172.16.1.20
 
 #  mysql5.6:
 #   image: mysql:5.6
@@ -71,7 +71,7 @@ services:
 #   hostname: mysql56.local
 #   networks:
 #      contnet:
-#       ipv4_address: 172.101.0.30
+#       ipv4_address: 172.16.1.30
 
 #  mariadb10:
 #   image: mariadb:10.2.39
@@ -87,7 +87,7 @@ services:
 #   hostname: mariadb10.local
 #   networks:
 #      contnet:
-#       ipv4_address: 172.101.0.40
+#       ipv4_address: 172.16.1.40
 
   elasticsearch:
     image: elasticsearch:7.16.1
@@ -102,7 +102,7 @@ services:
     hostname: elasticsearch7.local
     networks:
       contnet:
-        ipv4_address: 172.101.0.50
+        ipv4_address: 172.16.1.50
 
 #  opensearch:
 #    image: opensearchproject/opensearch:2.11.1
@@ -116,7 +116,7 @@ services:
 #    hostname: opensearch11.local
 #    networks:
 #      contnet:
-#        ipv4_address: 172.101.0.60
+#        ipv4_address: 172.16.1.60
 
   redis:
     image: redis:6.0.5
@@ -131,7 +131,7 @@ services:
     hostname: redis6.local
     networks:
       contnet:
-        ipv4_address: 172.101.0.70
+        ipv4_address: 172.16.1.70
 
   mailcatcher:
     image: sj26/mailcatcher
@@ -142,7 +142,7 @@ services:
       - "10125:1025"
     networks:
       contnet:
-       ipv4_address: 172.101.0.80
+       ipv4_address: 172.16.1.80
 
 networks:
   contnet:
@@ -150,4 +150,4 @@ networks:
     ipam:
      driver: default
      config:
-      - subnet: 172.101.0.0/16
+      - subnet: 172.16.0.0/16
