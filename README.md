@@ -379,7 +379,7 @@ Find out the general disk space on a computer:
 
 ### Notes on running multiple projects
 
-Usually developers need to run multiple Magento projects for their job. This is ideally done via Docker. Each time you need to create a new instance of a Magento Docker environment for another project, modify the docker-compose.yaml file to have unique container names, unique ports, and unique network name and subnet IP address mask. Then, manually edit the /etc/hosts file to take into account the new Magento project. My favorite tool for simultaneous comparing and editing files common to multiple projects, such as docker-compose.yaml, is gvimdiff.
+Usually developers need to run multiple Magento projects for their job. Additionally, you might need to run Magento projects at the same time, for example, to compare behavior with and without a certain module, to compare behavior before and after an upgrade of the same project, etc. This is ideally done via Docker, but it requires careful planning. Each time you need to create a new instance of a Magento Docker environment for another project, modify the docker-compose.yaml file to have unique container names, unique ports, and unique network name and subnet IP address mask. Then, manually edit the /etc/hosts file to take into account the new Magento project. My favorite tool for simultaneous comparing and editing files common to multiple projects, such as docker-compose.yaml, is gvimdiff.
 
 ### Other Tutorials    
 
